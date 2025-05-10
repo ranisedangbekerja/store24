@@ -6,6 +6,13 @@ import { ProductsTable } from "./ProductsTable";
 import SideBar from "./SideBar";
 
 const InputDesign: React.FC = () => {
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  // Handle search query change
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
   return (
     <main className="flex bg-gray-100 min-h-screen">
       {/* Sidebar (fixed, tidak perlu perubahan di sini) */}
@@ -13,10 +20,12 @@ const InputDesign: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex flex-col flex-1 pl-[280px] h-screen overflow-auto">
-        <SearchBar />
+        {/* Pass handleSearch function to SearchBar as onSearch prop */}
+        <SearchBar onSearch={handleSearch} />
         <div className="flex flex-col gap-6 p-6 md:p-8">
           <InventoryStats />
-          <ProductsTable />
+          {/* Pass searchQuery to ProductsTable */}
+          <ProductsTable searchQuery={searchQuery} />
         </div>
       </div>
     </main>

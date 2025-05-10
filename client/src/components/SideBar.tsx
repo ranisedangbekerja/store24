@@ -21,14 +21,6 @@ const SideBar: React.FC = () => {
           </div>
         </div>
       </div>
-
-      <div className="absolute bottom-6 left-6 text-base font-medium text-gray-500">
-        <MenuItem
-          icon="https://cdn.builder.io/api/v1/image/assets/TEMP/69855c4253abf663a66d52872ab0c43dd241fc57?placeholderIfAbsent=true&apiKey=1801958dbb714fc188da4c859fd1275c"
-          text="Log Out"
-          textColor="text-gray-500"
-        />
-      </div>
     </nav>
   );
 };
