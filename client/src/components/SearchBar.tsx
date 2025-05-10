@@ -1,7 +1,15 @@
 "use client";
 import * as React from "react";
 
-export const SearchBar: React.FC = () => {
+type SearchBarProps = {
+  onSearch: (query: string) => void;
+};
+
+export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onSearch(e.target.value);
+  };
+
   return (
     <div className="p-7 w-full bg-white border border-zinc-100">
       <div className="flex gap-2 items-center w-full">
@@ -23,6 +31,7 @@ export const SearchBar: React.FC = () => {
             type="text"
             placeholder="Search product, supplier, order"
             className="flex-1 text-base text-gray-400 outline-none"
+            onChange={handleSearchChange}
           />
         </div>
       </div>

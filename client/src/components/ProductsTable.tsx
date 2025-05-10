@@ -1,45 +1,109 @@
+// ProductsTable.tsx
+
 "use client";
 import * as React from "react";
 import { ActionButton } from "./ActionButton";
 import { TableHeader, TableRow, FiltersButton } from "./TableComponents";
-import { FormInput } from "./FormInput";
+import { ProductInputForm } from "./ProductInputForm";
 
-const productData = [
-  { name: "Maggi", quantity: "43 Packets", date: "11/12/22" },
-  { name: "Bru", quantity: "22 Packets", date: "21/12/22" },
-  { name: "Red Bull", quantity: "36 Packets", date: "5/12/22" },
-  { name: "Bourn Vita", quantity: "14 Packets", date: "8/12/22" },
-  { name: "Horlicks", quantity: "5 Packets", date: "9/1/23" },
-  { name: "Harpic", quantity: "10 Packets", date: "9/1/23" },
-  { name: "Ariel", quantity: "23 Packets", date: "15/12/23" },
-  { name: "Scotch Brite", quantity: "43 Packets", date: "6/6/23" },
-  { name: "Coca cola", quantity: "41 Packets", date: "11/11/22" },
-];
+// Define props type for ProductsTable to accept searchQuery
+type ProductsTableProps = {
+  searchQuery: string;
+};
 
-export const ProductsTable: React.FC = () => {
+export const ProductsTable: React.FC<ProductsTableProps> = ({ searchQuery }) => {
+  const [showForm, setShowForm] = React.useState(false);
+  const [products, setProducts] = React.useState<{ name: string; quantity: string; date: string }[]>([]);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [productsPerPage] = React.useState(10); // Max 10 products per page
+
+  const totalQuantity = products.reduce(
+  (sum, product) => sum + Number(product.quantity),
+  0
+);
+
+
+  const handleAddClick = () => setShowForm(true);
+
+  const handleAddProduct = (newProduct: { name: string; quantity: string; date: string }) => {
+    setProducts((prev) => [newProduct, ...prev]); // Add the new product at the top
+    setShowForm(false);
+    setCurrentPage(1); // Reset to the first page after adding
+  };
+
+  // Pagination logic
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+
+  // Filter products based on search query
+  const currentProducts = products
+    .filter((product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .slice(indexOfFirstProduct, indexOfLastProduct);
+
+  const handleNextPage = () => {
+    if (currentPage * productsPerPage < products.length) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   return (
     <section className="p-5 bg-white rounded-lg">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-medium text-zinc-700">Products</h2>
         <div className="flex gap-3">
-          <ActionButton variant="primary">Add Product</ActionButton>
+          <ActionButton variant="primary" onClick={handleAddClick}>
+            Add Product
+          </ActionButton>
           <FiltersButton />
           <ActionButton>Download all</ActionButton>
         </div>
       </div>
+
+      {/* Modal overlay */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <ProductInputForm
+            onClose={() => setShowForm(false)}
+            onSubmit={handleAddProduct}
+          />
+        </div>
+      )}
+
       <div className="w-full">
         <TableHeader />
         <div className="flex flex-col">
-          {productData.map((product, index) => (
-            <TableRow key={index} {...product} />
-          ))}
+          {currentProducts.length > 0 ? (
+            currentProducts.map((product, index) => (
+              <TableRow key={index} {...product} />
+            ))
+          ) : (
+            <div className="text-center py-4">No products found</div>
+          )}
         </div>
         <div className="flex justify-between items-center mt-4">
-          <button className="px-4 py-2.5 text-sm font-medium text-gray-600 bg-white rounded border border-gray-300 shadow-sm">
+          <button
+            className="px-4 py-2.5 text-sm font-medium text-gray-600 bg-white rounded border border-gray-300 shadow-sm"
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+          >
             Previous
           </button>
-          <div className="text-sm text-gray-600">Page 1 of 10</div>
-          <button className="px-4 py-2.5 text-sm font-medium text-gray-600 bg-white rounded border border-gray-300 shadow-sm">
+          <div className="text-sm text-gray-600">
+            Page {currentPage} of {Math.ceil(products.length / productsPerPage)}
+          </div>
+          <button
+            className="px-4 py-2.5 text-sm font-medium text-gray-600 bg-white rounded border border-gray-300 shadow-sm"
+            onClick={handleNextPage}
+            disabled={currentPage * productsPerPage >= products.length}
+          >
             Next
           </button>
         </div>
