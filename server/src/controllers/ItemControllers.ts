@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { db } from "../db/db";
+import { getSocketIO } from "../routes/itemRoutes";
 
 export async function addItem(req: Request, res: Response) {
   const { name, quantity, date } = req.body;
@@ -51,6 +52,23 @@ export async function addItem(req: Request, res: Response) {
         date: parsedDate,
       },
     });
+
+     // Format the response data
+    const formattedItem = {
+      ...newItem,
+      date: parsedDate.toISOString().split("T")[0],
+    };
+
+    // Emit the new product event through socket.io
+    const io = getSocketIO();
+    if (io) {
+      io.emit("new-product", {
+        name: formattedItem.name,
+        quantity: formattedItem.quantity,
+        date: formattedItem.date
+      });
+      console.log("Emitted new-product event:", formattedItem);
+    }
 
     res.status(201).json({
       message: "Item added successfully!",

@@ -39,7 +39,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ searchQuery }) => 
         quantity: Number(newProduct.quantity),
       };
 
-      await axios.post("http://localhost:8080/api/task", formattedProduct);
+      await axios.post("http://localhost:8080/api/task/add", formattedProduct);
       setShowForm(false);
     } catch (err) {
       setError("Failed to add product");
@@ -47,45 +47,43 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ searchQuery }) => 
     }
   };
 
-  React.useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setIsLoading(true);
-        const response = await axios.get("http://localhost:8080/api/task");
+React.useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get("http://localhost:8080/api/task");
 
-        const responseData = response?.data?.data;
+      console.log("Response data:", response.data);
 
-        if (
-          responseData &&
-          typeof responseData === "object" &&
-          "name" in responseData &&
-          "quantity" in responseData &&
-          "date" in responseData
-        ) {
-          const formatted = [
-            {
-              name: String(responseData.name),
-              quantity: Number(responseData.quantity),
-              date: String(responseData.date),
-            },
-          ];
-          setProducts(formatted);
-        } else {
-          console.error("Invalid data format:", response.data);
-          setProducts([]);
-          setError("Invalid data format received from server");
-        }
-      } catch (err) {
-        console.error("Fetch error:", err);
+      const responseData = response.data;
+
+      if (
+        responseData &&
+        typeof responseData === "object" &&
+        Array.isArray(responseData.data)
+      ) {
+        const formatted = responseData.data.map((item: any) => ({
+          name: String(item.name),
+          quantity: Number(item.quantity),
+          date: String(item.date),
+        }));
+        setProducts(formatted);
+      } else {
+        console.error("Invalid data format:", response.data);
         setProducts([]);
-        setError("Failed to load products");
-      } finally {
-        setIsLoading(false);
+        setError("Invalid data format received from server");
       }
-    };
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setProducts([]);
+      setError("Failed to load products");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchProducts();
-  }, []);
+  fetchProducts();
+}, []);
 
   React.useEffect(() => {
     const socket: Socket = io("http://localhost:8080");
