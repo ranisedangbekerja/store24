@@ -2,7 +2,8 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import itemRouter, {setSocketIO} from "./routes/itemRoutes";
+import itemRouter from "./routes/itemRoutes";
+import { setSocketIO } from "./utils/socket";
 
 // Initialize the app
 const app = express();

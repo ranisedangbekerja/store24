@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { db } from "../db/db";
-import { getSocketIO } from "../routes/itemRoutes";
+import { getSocketIO } from "../utils/socket";
 
 export async function addItem(req: Request, res: Response) {
   const { name, quantity, date } = req.body;
@@ -47,7 +47,7 @@ export async function addItem(req: Request, res: Response) {
 
     const newItem = await db.item.create({
       data: {
-        name: name.trim(),
+        name: name.trim().toLowerCase(),
         quantity: parsedQuantity,
         date: parsedDate,
       },
