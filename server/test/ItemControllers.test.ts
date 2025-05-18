@@ -1,11 +1,17 @@
 import { Request, Response } from 'express';
-import { addItem, readItem } from '../src/controllers/ItemControllers';
+import { addItem, readItem } from '../src/controllers/itemControllers';
 import { db } from '../src/db/db'; // sesuaikan path prisma client kamu
+import { getSocketIO } from '../src/utils/socket';
+
+jest.mock('../src/utils/socket', () => ({
+  getSocketIO: jest.fn(),
+}));
 
 describe('Item Controller', () => {
   let mockResponse: Partial<Response>;
   let jsonMock = jest.fn();
   let statusMock = jest.fn(() => ({ json: jsonMock }));
+  const mockEmit = jest.fn();
 
   beforeEach(() => {
     jsonMock = jest.fn();
@@ -14,11 +20,17 @@ describe('Item Controller', () => {
       status: statusMock as any,
     };
 
-    // Reset mock function pada setiap beforeEach
     (db.item as any) = {
       create: jest.fn(),
       findMany: jest.fn(),
     };
+
+    // Setup mock for getSocketIO to return mock socket with emit spy
+    (getSocketIO as jest.Mock).mockReturnValue({
+      emit: mockEmit,
+    });
+
+    mockEmit.mockClear();
   });
 
   describe('addItem Controller', () => {
@@ -36,7 +48,6 @@ describe('Item Controller', () => {
 
     it('should return 400 if name is missing', async () => {
       req.body = { quantity: 5, date: '2023-05-10' };
-
       await addItem(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(400);
@@ -107,7 +118,7 @@ describe('Item Controller', () => {
       req.body = {
         name: 'Test Item',
         quantity: 1,
-        date: '10-05-2023', // salah format
+        date: '10-05-2023',
       };
 
       await addItem(req as Request, res as Response);
@@ -148,10 +159,10 @@ describe('Item Controller', () => {
       });
     });
 
-    it('should accept 29 Feb in leap year', async () => {
+    it('should accept 29 Feb in leap year, should store name in lowercase, and emit socket.io event', async () => {
       const mockItem = {
         id: 1,
-        name: 'Leap Item',
+        name: 'leap item',
         quantity: 1,
         date: new Date('2024-02-29'),
       };
@@ -159,7 +170,7 @@ describe('Item Controller', () => {
       (db.item.create as jest.Mock).mockResolvedValue(mockItem);
 
       req.body = {
-        name: 'Leap Item',
+        name: 'Leap ITEM',
         quantity: 1,
         date: '2024-02-29',
       };
@@ -174,6 +185,20 @@ describe('Item Controller', () => {
           date: '2024-02-29',
         },
         error: null,
+      });
+
+      expect(mockEmit).toHaveBeenCalledWith('new-product', expect.objectContaining({
+        name: 'leap item',
+        quantity: 1,
+        date: '2024-02-29',
+      }));
+      
+      expect(db.item.create).toHaveBeenCalledWith({
+        data: {
+          name: 'leap item',
+          quantity: 1,
+          date: new Date('2024-02-29'),
+        },
       });
     });
 
@@ -210,7 +235,7 @@ describe('Item Controller', () => {
       const mockItems = [
         {
           id: 1,
-          name: 'Item A',
+          name: 'item a',
           quantity: 5,
           date: new Date('2024-05-17T00:00:00.000Z'),
         },
@@ -225,7 +250,7 @@ describe('Item Controller', () => {
         data: [
           {
             id: 1,
-            name: 'Item A',
+            name: 'item a',
             quantity: 5,
             date: '2024-05-17',
           },
