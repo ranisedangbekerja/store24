@@ -5,6 +5,9 @@ import { InventoryStats } from "./InventoryStats";
 import { ProductsTable } from "./ProductsTable";
 import SideBar from "./SideBar";
 
+type ProductsTableProps = {
+  searchQuery: string;
+};
 const InputDesign: React.FC = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
 

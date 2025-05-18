@@ -2,7 +2,6 @@
 
 import * as React from "react";
 
-//  ✅ Tipe props baru: quantity sekarang number
 type ProductInputFormProps = {
   onClose?: () => void;
   onSubmit?: (newProduct: { name: string; quantity: number; date: string }) => void;
@@ -45,10 +44,11 @@ export const ProductInputForm: React.FC<ProductInputFormProps> = ({ onClose, onS
     }
 
     const newProduct = {
-      name: productName,
-      quantity: parsedQuantity, // ✅ kirim sebagai number
+      name: productName.toLowerCase(),
+      quantity: parsedQuantity, 
       date: uploadDate,
     };
+    
 
     if (onSubmit) onSubmit(newProduct);
     handleDiscard();
