@@ -3,7 +3,7 @@ import { Router } from "express";
 
 const itemRouter = Router();
 
-itemRouter.get("/task", readItem);
-itemRouter.post("/task/add", addItem);
+itemRouter.get("/item", readItem);
+itemRouter.post("/item/add", addItem);
 
 export default itemRouter;

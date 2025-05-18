@@ -8,10 +8,10 @@ datasource db {
 }
 
 model Item {
-  item_Id      String   @id @default(uuid()) @db.Uuid
-  name        String   @db.VarChar(100)
+  item_Id     String   @id @default(uuid()) @db.Uuid
+  name        String    @db.VarChar(100)
   quantity    Int     
-  date        DateTime @db.Date 
+  dateTime    DateTime  @default(now()) 
 
   @@map("item")
 }

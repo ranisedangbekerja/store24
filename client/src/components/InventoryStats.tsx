@@ -17,7 +17,7 @@ export const InventoryStats: React.FC = () => {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get("http://localhost:8080/api/task");
+        const response = await axios.get("http://localhost:8080/api/item");
 
         const responseData = response.data;
         if (
@@ -71,7 +71,7 @@ export const InventoryStats: React.FC = () => {
             // retry fetch
             (async () => {
               try {
-                const res = await axios.get("http://localhost:8080/api/task");
+                const res = await axios.get("http://localhost:8080/api/item");
                 const data = res.data;
                 if (data && Array.isArray(data.data)) {
                   const formatted = data.data.map((item: any) => ({
