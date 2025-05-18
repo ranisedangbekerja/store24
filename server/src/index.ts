@@ -2,7 +2,7 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import itemRouter from "./routes/itemRoutes";
+import itemRouter, {setSocketIO} from "./routes/itemRoutes";
 
 // Initialize the app
 const app = express();
@@ -23,6 +23,8 @@ const io = new Server(server, {
   }
 });
 
+// Share socket.io instance with the router
+setSocketIO(io);
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -51,7 +53,6 @@ app.get("/", (req, res) => {
 
 app.use("/api", itemRouter);
 
-
 // Socket.IO connection handling
 io.on('connection', (socket) => {
   console.log('Client connected');
@@ -66,13 +67,6 @@ io.on('connection', (socket) => {
   socket.on('leave-task', (itempage) => {
     socket.leave(itempage);
     console.log(`Client left task room: ${itempage}`);
-  });
-
-  // Handle new items
-  socket.on('item', (item) => {
-    console.log('New item received:', item);
-    // Broadcast the item to all clients in the page
-    io.to(item.item_Id).emit('item', item);
   });
 
   socket.on('disconnect', () => {
