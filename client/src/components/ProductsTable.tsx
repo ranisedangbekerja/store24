@@ -4,19 +4,24 @@ import axios from "axios";
 import { io, Socket } from "socket.io-client";
 
 import { ActionButton } from "./ActionButton";
-import { TableHeader, TableRow, FiltersButton } from "./TableComponents";
+import { TableHeader, TableRow, SortButton } from "./TableComponents";
 import { ProductInputForm } from "./ProductInputForm";
 
-
-type Product = {
+type NewProduct = {
   name: string;
   quantity: number;
+};
+
+type Product = NewProduct & {
   date: string;
+  dateTime: string;
 };
 
 type ProductsTableProps = {
   searchQuery: string;
 };
+
+type SortOption = null | "date-old" | "qty-high" | "qty-low";
 
 export const ProductsTable: React.FC<ProductsTableProps> = ({ searchQuery }) => {
   const [showForm, setShowForm] = React.useState(false);
@@ -25,17 +30,21 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ searchQuery }) => 
   const [productsPerPage] = React.useState(10);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [sortOption, setSortOption] = React.useState<SortOption>(null);
+
+  const totalQuantity = React.useMemo(() => {
+    if (!Array.isArray(products)) return 0;
+    return products.reduce((sum, product) => sum + product.quantity, 0);
+  }, [products]);
 
   const handleAddClick = () => setShowForm(true);
 
-  const handleAddProduct = async (newProduct: Product) => {
+  const handleAddProduct = async (newProduct: NewProduct) => {
     try {
-      const formattedProduct: Product = {
-        ...newProduct,
+      await axios.post("http://localhost:8080/api/item/add", {
+        name: newProduct.name,
         quantity: Number(newProduct.quantity),
-      };
-
-      await axios.post("http://localhost:8080/api/task/add", formattedProduct);
+      });
       setShowForm(false);
     } catch (err) {
       setError("Failed to add product");
@@ -43,43 +52,44 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ searchQuery }) => 
     }
   };
 
-React.useEffect(() => {
-  const fetchProducts = async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get("http://localhost:8080/api/task");
+  React.useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get("http://localhost:8080/api/item");
 
-      console.log("Response data:", response.data);
+        console.log("Response data:", response.data);
 
-      const responseData = response.data;
+        const responseData = response.data;
 
-      if (
-        responseData &&
-        typeof responseData === "object" &&
-        Array.isArray(responseData.data)
-      ) {
-        const formatted = responseData.data.map((item: any) => ({
-          name: String(item.name),
-          quantity: Number(item.quantity),
-          date: String(item.date),
-        }));
-        setProducts(formatted);
-      } else {
-        console.error("Invalid data format:", response.data);
+        if (
+          responseData &&
+          typeof responseData === "object" &&
+          Array.isArray(responseData.data)
+        ) {
+          const formatted = responseData.data.map((item: any) => ({
+            name: String(item.name),
+            quantity: Number(item.quantity),
+            date: String(item.date),
+            dateTime: String(item.dateTime),
+          }));
+          setProducts(formatted);
+        } else {
+          console.error("Invalid data format:", response.data);
+          setProducts([]);
+          setError("Invalid data format received from server");
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
         setProducts([]);
-        setError("Invalid data format received from server");
+        setError("Failed to load products");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error("Fetch error:", err);
-      setProducts([]);
-      setError("Failed to load products");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
-  fetchProducts();
-}, []);
+    fetchProducts();
+  }, []);
 
   React.useEffect(() => {
     const socket: Socket = io("http://localhost:8080");
@@ -97,6 +107,7 @@ React.useEffect(() => {
             name: String((product as any).name),
             quantity: Number((product as any).quantity),
             date: String((product as any).date),
+            dateTime: String((product as any).dateTime),
           };
 
           setProducts((prev) => [validatedProduct, ...(Array.isArray(prev) ? prev : [])]);
@@ -119,19 +130,33 @@ React.useEffect(() => {
   }, []);
 
   const { filteredProducts, currentProducts, totalPages } = React.useMemo(() => {
-    const filtered = Array.isArray(products)
+    let filtered = Array.isArray(products)
       ? products.filter((product) =>
           product.name.toLowerCase().includes(searchQuery.toLowerCase())
         )
       : [];
 
+    // Sort logic
+    switch (sortOption) {
+      case "date-old":
+        filtered = [...filtered].sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
+        console.log("Sorted date-old:", filtered.map(f => `${f.name} => ${f.dateTime}`));        
+        break;
+      case "qty-high":
+        filtered = [...filtered].sort((a, b) => b.quantity - a.quantity);
+        break;
+      case "qty-low":
+        filtered = [...filtered].sort((a, b) => a.quantity - b.quantity);
+        break;
+    }
+
     const indexOfLastProduct = currentPage * productsPerPage;
     const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
     const current = filtered.slice(indexOfFirstProduct, indexOfLastProduct);
-    const total = Math.ceil(filtered.length / productsPerPage);
+    const total = Math.max(1, Math.ceil(filtered.length / productsPerPage));
 
     return { filteredProducts: filtered, currentProducts: current, totalPages: total };
-  }, [products, searchQuery, currentPage, productsPerPage]);
+  }, [products, searchQuery, currentPage, productsPerPage, sortOption]);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -161,21 +186,20 @@ React.useEffect(() => {
             setCurrentPage(1);
             try {
               const res = await axios.get("http://localhost:8080/api/task");
-              const responseData = res?.data?.data;
+              const responseData = res?.data;
+              
               if (
                 responseData &&
                 typeof responseData === "object" &&
-                "name" in responseData &&
-                "quantity" in responseData &&
-                "date" in responseData
+                Array.isArray(responseData.data)
               ) {
-                setProducts([
-                  {
-                    name: String(responseData.name),
-                    quantity: Number(responseData.quantity),
-                    date: String(responseData.date),
-                  },
-                ]);
+                const formatted = responseData.data.map((item: any) => ({
+                  name: String(item.name),
+                  quantity: Number(item.quantity),
+                  date: String(item.date),
+                  dateTime: String(item.dateTime),
+                }));
+                setProducts(formatted);
               } else {
                 setProducts([]);
               }
@@ -196,13 +220,13 @@ React.useEffect(() => {
     <section className="p-5 bg-white rounded-lg">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-medium text-zinc-700">
-          Products 
+          Products
         </h2>
         <div className="flex gap-3">
           <ActionButton variant="primary" onClick={handleAddClick}>
             Add Product
           </ActionButton>
-          <FiltersButton />
+          <SortButton activeSort={sortOption} onSortChange={setSortOption} />
         </div>
       </div>
 
@@ -234,7 +258,7 @@ React.useEffect(() => {
           )}
         </div>
 
-        {totalPages > 1 && (
+        {filteredProducts.length > productsPerPage && (
           <div className="flex justify-between items-center mt-4">
             <button
               className={`px-4 py-2.5 text-sm font-medium rounded border shadow-sm ${

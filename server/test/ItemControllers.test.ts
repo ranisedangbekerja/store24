@@ -47,7 +47,7 @@ describe('Item Controller', () => {
     });
 
     it('should return 400 if name is missing', async () => {
-      req.body = { quantity: 5, date: '2023-05-10' };
+      req.body = { quantity: 5 };
       await addItem(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(400);
@@ -60,7 +60,6 @@ describe('Item Controller', () => {
       req.body = {
         name: 'a'.repeat(101),
         quantity: 5,
-        date: '2023-05-10',
       };
 
       await addItem(req as Request, res as Response);
@@ -74,7 +73,6 @@ describe('Item Controller', () => {
     it('should return 400 if quantity is missing', async () => {
       req.body = {
         name: 'Test Item',
-        date: '2023-05-10',
       };
 
       await addItem(req as Request, res as Response);
@@ -100,71 +98,12 @@ describe('Item Controller', () => {
       });
     });
 
-    it('should return 400 if date is missing', async () => {
-      req.body = {
-        name: 'Test Item',
-        quantity: 1,
-      };
-
-      await addItem(req as Request, res as Response);
-
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        message: "Field 'date' is required and must be in YYYY-MM-DD format!",
-      });
-    });
-
-    it('should return 400 if date is not in YYYY-MM-DD format', async () => {
-      req.body = {
-        name: 'Test Item',
-        quantity: 1,
-        date: '10-05-2023',
-      };
-
-      await addItem(req as Request, res as Response);
-
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        message: "Field 'date' is required and must be in YYYY-MM-DD format!",
-      });
-    });
-
-    it('should return 400 if month is not between 1 and 12', async () => {
-      req.body = {
-        name: 'Test Item',
-        quantity: 1,
-        date: '2023-13-10',
-      };
-
-      await addItem(req as Request, res as Response);
-
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        message: 'Month must be between 1 and 12.',
-      });
-    });
-
-    it('should return 400 if day is invalid for month/year (e.g., 30 Feb)', async () => {
-      req.body = {
-        name: 'Test Item',
-        quantity: 1,
-        date: '2023-02-30',
-      };
-
-      await addItem(req as Request, res as Response);
-
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        message: 'Invalid day for the given month and year. 2/2023 has only 28 days.',
-      });
-    });
-
-    it('should accept 29 Feb in leap year, should store name in lowercase, and emit socket.io event', async () => {
+    it('should store name in lowercase and emit socket.io event', async () => {
       const mockItem = {
         id: 1,
         name: 'leap item',
         quantity: 1,
-        date: new Date('2024-02-29'),
+        dateTime: new Date('2024-05-01T00:00:00.000Z'),
       };
 
       (db.item.create as jest.Mock).mockResolvedValue(mockItem);
@@ -172,7 +111,6 @@ describe('Item Controller', () => {
       req.body = {
         name: 'Leap ITEM',
         quantity: 1,
-        date: '2024-02-29',
       };
 
       await addItem(req as Request, res as Response);
@@ -182,7 +120,7 @@ describe('Item Controller', () => {
         message: 'Item added successfully!',
         data: {
           ...mockItem,
-          date: '2024-02-29',
+          date: '2024-05-01',
         },
         error: null,
       });
@@ -190,14 +128,13 @@ describe('Item Controller', () => {
       expect(mockEmit).toHaveBeenCalledWith('new-product', expect.objectContaining({
         name: 'leap item',
         quantity: 1,
-        date: '2024-02-29',
+        date: '2024-05-01',
       }));
       
       expect(db.item.create).toHaveBeenCalledWith({
         data: {
           name: 'leap item',
           quantity: 1,
-          date: new Date('2024-02-29'),
         },
       });
     });
@@ -237,7 +174,7 @@ describe('Item Controller', () => {
           id: 1,
           name: 'item a',
           quantity: 5,
-          date: new Date('2024-05-17T00:00:00.000Z'),
+          dateTime: new Date('2024-05-17T00:00:00.000Z'),
         },
       ];
 
@@ -252,6 +189,7 @@ describe('Item Controller', () => {
             id: 1,
             name: 'item a',
             quantity: 5,
+            dateTime: new Date('2024-05-17T00:00:00.000Z'),
             date: '2024-05-17',
           },
         ],
@@ -270,7 +208,7 @@ describe('Item Controller', () => {
       });
     });
 
-    it('should return 500 if database throws error', async () => {
+    it('should return 500 if Prisma throws error', async () => {
       (db.item.findMany as jest.Mock).mockRejectedValue(new Error('DB error'));
 
       await readItem(req as Request, res as Response);

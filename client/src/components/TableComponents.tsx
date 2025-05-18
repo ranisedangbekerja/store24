@@ -22,23 +22,65 @@ export const TableRow: React.FC<ProductData> = ({ name, quantity, date }) => (
   </div>
 );
 
-export const FiltersButton: React.FC = () => (
-  <button className="flex gap-2 justify-center items-center px-4 py-2.5 text-sm font-medium text-gray-500 rounded border border-gray-300">
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M5 10H15M2.5 5H17.5M7.5 15H12.5"
-        stroke="#5D6679"
-        strokeWidth="1.67"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-    <span>Filters</span>
-  </button>
-);
+type SortOption =
+  | null
+  | "date-old"
+  | "qty-high"
+  | "qty-low";
+
+interface SortButtonProps {
+  activeSort: SortOption;
+  onSortChange: (option: SortOption) => void;
+}
+
+export const SortButton: React.FC<SortButtonProps> = ({ activeSort, onSortChange }) => {
+  const toggleSort = (option: SortOption) => {
+    if (activeSort === option) {
+      onSortChange(null); // reset if clicked again
+    } else {
+      onSortChange(option);
+    }
+  };
+
+  return (
+    <div className="relative group">
+      <button
+        className="flex gap-2 justify-center items-center px-4 py-2.5 text-sm font-medium text-gray-500 rounded border border-gray-300"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M3 5H15" stroke="#5D6679" strokeWidth="1.5" strokeLinecap="round" />
+          <path d="M3 10H11" stroke="#5D6679" strokeWidth="1.5" strokeLinecap="round" />
+          <path d="M3 15H7" stroke="#5D6679" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+        <span>Sort By</span>
+      </button>
+
+      <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded shadow-md z-10 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-150">
+        {[
+          { label: "Date (old to new)", value: "date-old" },
+          { label: "Quantity (high to low)", value: "qty-high" },
+          { label: "Quantity (low to high)", value: "qty-low" },
+        ].map(({ label, value }) => (
+          <button
+            key={value}
+            onClick={() => toggleSort(value as SortOption)}
+            className={`block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 ${
+              activeSort === value ? "bg-gray-200 font-semibold" : ""
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+
