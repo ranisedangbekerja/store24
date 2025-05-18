@@ -7,6 +7,7 @@ import { ActionButton } from "./ActionButton";
 import { TableHeader, TableRow, FiltersButton } from "./TableComponents";
 import { ProductInputForm } from "./ProductInputForm";
 
+
 type Product = {
   name: string;
   quantity: number;
@@ -24,11 +25,6 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ searchQuery }) => 
   const [productsPerPage] = React.useState(10);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-
-  const totalQuantity = React.useMemo(() => {
-    if (!Array.isArray(products)) return 0;
-    return products.reduce((sum, product) => sum + product.quantity, 0);
-  }, [products]);
 
   const handleAddClick = () => setShowForm(true);
 
@@ -200,14 +196,13 @@ React.useEffect(() => {
     <section className="p-5 bg-white rounded-lg">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-medium text-zinc-700">
-          Products {totalQuantity > 0 && `(Total: ${totalQuantity})`}
+          Products 
         </h2>
         <div className="flex gap-3">
           <ActionButton variant="primary" onClick={handleAddClick}>
             Add Product
           </ActionButton>
           <FiltersButton />
-          <ActionButton>Download all</ActionButton>
         </div>
       </div>
 
