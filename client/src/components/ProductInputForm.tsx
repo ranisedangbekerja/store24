@@ -2,10 +2,10 @@
 
 import * as React from "react";
 
-//  tipe props untuk menerima onClose dan onSubmit
+//  ✅ Tipe props baru: quantity sekarang number
 type ProductInputFormProps = {
   onClose?: () => void;
-  onSubmit?: (newProduct: { name: string; quantity: string; date: string }) => void;
+  onSubmit?: (newProduct: { name: string; quantity: number; date: string }) => void;
 };
 
 export const ProductInputForm: React.FC<ProductInputFormProps> = ({ onClose, onSubmit }) => {
@@ -25,15 +25,19 @@ export const ProductInputForm: React.FC<ProductInputFormProps> = ({ onClose, onS
   };
 
   const handleAdd = () => {
-    // Validate quantity and name
-    if (parseFloat(quantity) <= 0) {
-      setQuantityError("Quantity cannot be less than 0.");
+    const parsedQuantity = Number(quantity);
+
+    if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+      setQuantityError("Quantity must be greater than 0.");
       return;
     } else {
       setQuantityError(null);
     }
 
-    if (productName.length > 100) {
+    if (productName.length === 0) {
+      setNameError("Product name is required.");
+      return;
+    } else if (productName.length > 100) {
       setNameError("Product name cannot exceed 100 characters.");
       return;
     } else {
@@ -42,22 +46,17 @@ export const ProductInputForm: React.FC<ProductInputFormProps> = ({ onClose, onS
 
     const newProduct = {
       name: productName,
-      quantity,
+      quantity: parsedQuantity, // ✅ kirim sebagai number
       date: uploadDate,
     };
 
-    if (onSubmit) onSubmit(newProduct); // panggil callback dari parent
-    handleDiscard(); // reset & tutup
+    if (onSubmit) onSubmit(newProduct);
+    handleDiscard();
   };
 
-  // Handle quantity input change and ensure it's not less than 0
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Ensure the value is either a positive number or zero
-    if (!isNaN(parseFloat(value)) && parseFloat(value) >= 0) {
-      setQuantity(value);
-      setQuantityError(null); // Clear any existing error when input is valid
-    }
+    setQuantity(e.target.value);
+    setQuantityError(null); // reset error saat input valid
   };
 
   return (
@@ -83,7 +82,8 @@ export const ProductInputForm: React.FC<ProductInputFormProps> = ({ onClose, onS
             className="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring text-gray-700 placeholder-gray-400"
             placeholder="Enter product quantity"
             value={quantity}
-            onChange={handleQuantityChange} // Use the new handler
+            onChange={handleQuantityChange}
+            min="1"
           />
           {quantityError && <span className="text-red-500 text-sm">{quantityError}</span>}
         </div>

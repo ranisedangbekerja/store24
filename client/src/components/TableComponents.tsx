@@ -2,7 +2,7 @@ import * as React from "react";
 
 interface ProductData {
   name: string;
-  quantity: string;
+  quantity: number; // ✅ ubah jadi number
   date: string;
 }
 
