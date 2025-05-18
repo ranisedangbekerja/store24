@@ -1,4 +1,4 @@
-import { addItem, readItem } from "@/controllers/ItemControllers";
+import { addItem, readItem } from "../controllers/ItemControllers";
 import { Router } from "express";
 
 const itemRouter = Router();
