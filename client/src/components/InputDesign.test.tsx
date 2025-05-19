@@ -1,42 +1,48 @@
-import { render, screen } from "@testing-library/react";
+import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import InputDesign from "./InputDesign";
+import '@testing-library/jest-dom';
 
-describe("InputDesign", () => {
-  it("renders the main sections", () => {
+// Mock child components so we only test InputDesign logic
+jest.mock("../components/SearchBar", () => ({
+  SearchBar: ({ onSearch }: { onSearch: (q: string) => void }) => (
+    <input
+      placeholder="Search..."
+      onChange={(e) => onSearch(e.target.value)}
+      data-testid="search-bar"
+    />
+  ),
+}));
+
+jest.mock("../components/ProductsTable", () => ({
+  ProductsTable: ({ searchQuery }: { searchQuery: string }) => (
+    <div data-testid="products-table">{searchQuery}</div>
+  ),
+}));
+
+jest.mock("../components/InventoryStats", () => ({
+  InventoryStats: () => <div data-testid="inventory-stats">Stats</div>,
+}));
+
+jest.mock("../components/SideBar", () => ({
+  __esModule: true,
+  default: () => <aside data-testid="sidebar">Sidebar</aside>,
+}));
+
+describe("InputDesign Component", () => {
+  it("renders all main sections", () => {
     render(<InputDesign />);
-
-    // Check for main sections
-    expect(
-      screen.getByPlaceholderText("Search product, supplier, order"),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Overall Inventory")).toBeInTheDocument();
-    expect(screen.getByText("Products")).toBeInTheDocument();
+    expect(screen.getByTestId("sidebar")).toBeInTheDocument();
+    expect(screen.getByTestId("search-bar")).toBeInTheDocument();
+    expect(screen.getByTestId("inventory-stats")).toBeInTheDocument();
+    expect(screen.getByTestId("products-table")).toBeInTheDocument();
   });
 
-  it("displays the correct total products count", () => {
+  it("updates searchQuery when typing in search bar", () => {
     render(<InputDesign />);
-    expect(screen.getByText("21,190")).toBeInTheDocument();
-    expect(screen.getByText("Total Products")).toBeInTheDocument();
-  });
+    const searchInput = screen.getByTestId("search-bar");
+    fireEvent.change(searchInput, { target: { value: "apple" } });
 
-  it("renders the product table with correct headers", () => {
-    render(<InputDesign />);
-    expect(screen.getByText("Products")).toBeInTheDocument();
-    expect(screen.getByText("Quantity")).toBeInTheDocument();
-    expect(screen.getByText("Date")).toBeInTheDocument();
-  });
-
-  it("renders action buttons", () => {
-    render(<InputDesign />);
-    expect(screen.getByText("Add Product")).toBeInTheDocument();
-    expect(screen.getByText("Filters")).toBeInTheDocument();
-    expect(screen.getByText("Download all")).toBeInTheDocument();
-  });
-
-  it("renders pagination controls", () => {
-    render(<InputDesign />);
-    expect(screen.getByText("Previous")).toBeInTheDocument();
-    expect(screen.getByText("Next")).toBeInTheDocument();
-    expect(screen.getByText("Page 1 of 10")).toBeInTheDocument();
+    expect(screen.getByTestId("products-table").textContent).toBe("apple");
   });
 });
