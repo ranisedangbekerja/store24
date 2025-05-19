@@ -68,8 +68,22 @@ Website ini dibuat untuk memenuhi tugas mata kuliah Pengujian Perangkat Lunak We
    * Berdasarkan jumlah barang terendah
    * Berdasarkan jumlah barang terbanyak
 
-## Screenshot hasil API Test
-## Screenshot coverage unit test
+## Screenshot Hasil API Test
+<p align="center">
+ <img width="1000px" src="documentation/API-GET.jpg" />
+</p>
+<p align="center">
+ <img width="1000px" src="documentation/API-POST.jpg" />
+</p>
+## Screenshot Coverage Test
+1. Back-End 
+<p align="center">
+ <img width="1000px" src="documentation/CoverageTest-backend.jpg" />
+</p>
+2. Front-End
+<p align="center">
+ <img width="1000px" src="documentation/Coveragetest-FrontEnd.png" />
+</p>
 
 ## Next.js Project 
 ![Next.js](https://img.shields.io/badge/next%20js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
