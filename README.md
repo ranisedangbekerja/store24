@@ -75,6 +75,7 @@ Website ini dibuat untuk memenuhi tugas mata kuliah Pengujian Perangkat Lunak We
 <p align="center">
  <img width="1000px" src="documentation/API-POST.jpg" />
 </p>
+
 ## Screenshot Coverage Test
 1. Back-End 
 <p align="center">
