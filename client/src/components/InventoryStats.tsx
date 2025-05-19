@@ -48,8 +48,10 @@ export const InventoryStats: React.FC = () => {
   }, []);
 
   const totalProducts = React.useMemo(() => {
-    return products.length;
+    const uniqueNames = new Set(products.map((p) => p.name));
+    return uniqueNames.size;
   }, [products]);
+
 
   const totalQuantity = React.useMemo(() => {
     return products.reduce((sum, p) => sum + p.quantity, 0);

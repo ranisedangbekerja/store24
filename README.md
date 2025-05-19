@@ -44,9 +44,8 @@ Website ini dibuat untuk memenuhi tugas mata kuliah Pengujian Perangkat Lunak We
    * AC 2.2 : Formulir input menampilkan field nama, jumlah, dan tanggal pencatatan produk.
    * AC 2.3 : Pengguna wajib mengisi field nama produk dan tidak melebihi 100 karakter.
    * AC 2.4 : Pengguna wajib mengisi field jumlah produk dan tidak bernilai negatif.
-   * AC 2.5 : Pengguna wajib mengisi field tanggal pencatatan barang.
-   * AC 2.6 : Jika pengguna melakukan kesalahan saat mengisi formulir input, maka pesan error harus ditampilkan sesuai dengan kesalahan yang dilakukan.
-   * AC 2.7 : Saat pengguna menekan tombol “Save Product”. Sistem akan menyimpan entri ke database, halaman dashboard ditampilkan, dan 10 produk baru diperbarui.
+   * AC 2.5 : Jika pengguna melakukan kesalahan saat mengisi formulir input, maka pesan error harus ditampilkan sesuai dengan kesalahan yang dilakukan.
+   * AC 2.6 : Saat pengguna menekan tombol “Save Product”. Sistem akan menyimpan entri ke database, halaman dashboard ditampilkan, dan 10 produk baru diperbarui.
 
 
 ## Features 💼 
@@ -69,8 +68,23 @@ Website ini dibuat untuk memenuhi tugas mata kuliah Pengujian Perangkat Lunak We
    * Berdasarkan jumlah barang terendah
    * Berdasarkan jumlah barang terbanyak
 
-## Screenshot hasil API Test
-## Screenshot coverage unit test
+## Screenshot Hasil API Test
+<p align="center">
+ <img width="1000px" src="documentation/API-GET.jpg" />
+</p>
+<p align="center">
+ <img width="1000px" src="documentation/API-POST.jpg" />
+</p>
+
+## Screenshot Coverage Test
+1. Back-End 
+<p align="center">
+ <img width="1000px" src="documentation/CoverageTest-backend.jpg" />
+</p>
+2. Front-End
+<p align="center">
+ <img width="1000px" src="documentation/full-covtest-fe.png" />
+</p>
 
 ## Next.js Project 
 ![Next.js](https://img.shields.io/badge/next%20js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
