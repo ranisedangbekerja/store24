@@ -45,7 +45,7 @@ Website ini dibuat untuk memenuhi tugas mata kuliah Pengujian Perangkat Lunak We
    * AC 2.3 : Pengguna wajib mengisi field nama produk dan tidak melebihi 100 karakter.
    * AC 2.4 : Pengguna wajib mengisi field jumlah produk dan tidak bernilai negatif.
    * AC 2.5 : Jika pengguna melakukan kesalahan saat mengisi formulir input, maka pesan error harus ditampilkan sesuai dengan kesalahan yang dilakukan.
-   * AC 2.6 : Saat pengguna menekan tombol “Save Product”. Sistem akan menampilkan pesan “Product Successfully Added” dan menyimpan entri ke database, halaman dashboard ditampilkan, dan 10 produk baru diperbarui.
+   * AC 2.6 : Saat pengguna menekan tombol “Save Product”. Sistem akan menampilkan pesan “Product successfully added!” dan menyimpan entri ke database, halaman dashboard ditampilkan, dan 10 produk baru diperbarui.
 
 
 ## Features 💼 
