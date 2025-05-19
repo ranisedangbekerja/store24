@@ -6,6 +6,7 @@ import { io, Socket } from "socket.io-client";
 import { ActionButton } from "./ActionButton";
 import { TableHeader, TableRow, SortButton } from "./TableComponents";
 import { ProductInputForm } from "./ProductInputForm";
+import SuccessModal from "./SuccessModal";
 
 type NewProduct = {
   name: string;
@@ -25,12 +26,16 @@ type SortOption = null | "date-old" | "qty-high" | "qty-low";
 
 export const ProductsTable: React.FC<ProductsTableProps> = ({ searchQuery }) => {
   const [showForm, setShowForm] = React.useState(false);
+  const [showSuccess, setShowSuccess] = React.useState(false);
   const [products, setProducts] = React.useState<Product[]>([]);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [productsPerPage] = React.useState(10);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [sortOption, setSortOption] = React.useState<SortOption>(null);
+
+  // Durasi tampil modal sukses (default 10 detik)
+  const successDuration = 2000;
 
   const totalQuantity = React.useMemo(() => {
     if (!Array.isArray(products)) return 0;
@@ -45,7 +50,18 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ searchQuery }) => 
         name: newProduct.name,
         quantity: Number(newProduct.quantity),
       });
+
+      // Tutup form terlebih dahulu
       setShowForm(false);
+
+      // Tampilkan modal sukses
+      setShowSuccess(true);
+
+      // Hide modal sukses setelah waktu successDuration
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, successDuration);
+
     } catch (err) {
       setError("Failed to add product");
       console.error("Error adding product:", err);
@@ -139,8 +155,9 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ searchQuery }) => 
     // Sort logic
     switch (sortOption) {
       case "date-old":
-        filtered = [...filtered].sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
-        console.log("Sorted date-old:", filtered.map(f => `${f.name} => ${f.dateTime}`));        
+        filtered = [...filtered].sort(
+          (a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
+        );
         break;
       case "qty-high":
         filtered = [...filtered].sort((a, b) => b.quantity - a.quantity);
@@ -187,7 +204,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ searchQuery }) => 
             try {
               const res = await axios.get("http://localhost:8080/api/task");
               const responseData = res?.data;
-              
+
               if (
                 responseData &&
                 typeof responseData === "object" &&
@@ -219,9 +236,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ searchQuery }) => 
   return (
     <section className="p-5 bg-white rounded-lg">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-medium text-zinc-700">
-          Products
-        </h2>
+        <h2 className="text-xl font-medium text-zinc-700">Products</h2>
         <div className="flex gap-3">
           <ActionButton variant="primary" onClick={handleAddClick}>
             Add Product
@@ -236,6 +251,12 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ searchQuery }) => 
             onClose={() => setShowForm(false)}
             onSubmit={handleAddProduct}
           />
+        </div>
+      )}
+
+      {showSuccess && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/40">
+          <SuccessModal message="Product successfully added!" />
         </div>
       )}
 
