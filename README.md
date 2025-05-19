@@ -82,7 +82,7 @@ Website ini dibuat untuk memenuhi tugas mata kuliah Pengujian Perangkat Lunak We
 </p>
 2. Front-End
 <p align="center">
- <img width="1000px" src="documentation/Coveragetest-FrontEnd.png" />
+ <img width="1000px" src="documentation/full-covtest-fe.png" />
 </p>
 
 ## Next.js Project 
