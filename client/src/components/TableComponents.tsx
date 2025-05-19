@@ -7,7 +7,7 @@ interface ProductData {
 }
 
 export const TableHeader: React.FC = () => (
-  <div className="grid grid-cols-3 gap-6 pb-4 text-sm font-medium text-gray-500 border-gray-300 border-[0.5px]">
+  <div className="grid grid-cols-3 gap-6 pb-4 text-sm font-medium text-black border-gray-300 border-[0.5px]">
     <div>Products</div>
     <div>Quantity</div>
     <div>Date</div>
@@ -15,7 +15,7 @@ export const TableHeader: React.FC = () => (
 );
 
 export const TableRow: React.FC<ProductData> = ({ name, quantity, date }) => (
-  <div className="grid grid-cols-3 py-3 text-sm text-gray-600 border-gray-300 border-[0.5px]">
+  <div className="grid grid-cols-3 py-3 text-sm text-black border-gray-300 border-[0.5px]">
     <div>{name}</div>
     <div>{quantity}</div>
     <div>{date}</div>
@@ -45,7 +45,7 @@ export const SortButton: React.FC<SortButtonProps> = ({ activeSort, onSortChange
   return (
     <div className="relative group">
       <button
-        className="flex gap-2 justify-center items-center px-4 py-2.5 text-sm font-medium text-gray-500 rounded border border-gray-300"
+        className="flex gap-2 justify-center items-center px-4 py-2.5 text-sm font-medium text-black rounded border border-gray-300"
       >
         <svg
           width="20"
@@ -70,8 +70,8 @@ export const SortButton: React.FC<SortButtonProps> = ({ activeSort, onSortChange
           <button
             key={value}
             onClick={() => toggleSort(value as SortOption)}
-            className={`block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 ${
-              activeSort === value ? "bg-gray-200 font-semibold" : ""
+            className={`block w-full px-4 py-2 text-left text-sm hover:bg-blue-600 hover:text-black ${
+              activeSort === value ? "bg-blue-600 font-semibold text-black" : "text-black"
             }`}
           >
             {label}
